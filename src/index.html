@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Build Power Platform custom connectors without wrestling with YAML or C# from scratch." />
+  <title>Custom Connector Builder – Mightora</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/mightora/shared-ui@main/shared.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- ── Site Header ──────────────────────────────────────────── -->
+  <header role="banner">
+    <mightora-header></mightora-header>
+  </header>
+
+  <main id="main-content">
+
+    <!-- ── Hero ─────────────────────────────────────────────────── -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container">
+        <h1 class="hero__title" id="hero-title">Custom Connector Builder</h1>
+        <p class="hero__description">
+          Build Power Platform custom connectors without wrestling with YAML or C# from scratch.
+          Define your connector step by step and get ready-to-use code.
+        </p>
+        <div class="hero__actions">
+          <a href="#step-builder" class="btn btn--primary">Start building</a>
+          <a href="#examples" class="btn btn--outline">View examples</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── What This Tool Helps With ─────────────────────────────── -->
+    <section class="section section--alt" aria-labelledby="benefits-title">
+      <div class="container">
+        <h2 class="section__title" id="benefits-title">What This Tool Helps With</h2>
+        <p class="section__lead">
+          Custom connectors are powerful, but the configuration files can be daunting.
+          This tool guides you through the process and generates everything you need.
+        </p>
+        <ul class="benefits-grid" role="list">
+          <li class="benefit-card">
+            <span class="benefit-card__icon" aria-hidden="true">📄</span>
+            <h3 class="benefit-card__title">OpenAPI YAML</h3>
+            <p class="benefit-card__text">
+              Generates valid OpenAPI 2.0 (Swagger) YAML that you can import directly into Power Platform.
+            </p>
+          </li>
+          <li class="benefit-card">
+            <span class="benefit-card__icon" aria-hidden="true">⚙️</span>
+            <h3 class="benefit-card__title">C# Script Code</h3>
+            <p class="benefit-card__text">
+              Creates the C# policy template script to transform requests and responses inside the connector.
+            </p>
+          </li>
+          <li class="benefit-card">
+            <span class="benefit-card__icon" aria-hidden="true">🧱</span>
+            <h3 class="benefit-card__title">Visual Block Builder</h3>
+            <p class="benefit-card__text">
+              Assemble C# logic visually using pre-built blocks for common patterns like validation and calculations.
+            </p>
+          </li>
+          <li class="benefit-card">
+            <span class="benefit-card__icon" aria-hidden="true">🔒</span>
+            <h3 class="benefit-card__title">Authentication Patterns</h3>
+            <p class="benefit-card__text">
+              Supports no auth, API key, Basic Auth, and OAuth 2.0 – with the correct YAML generated automatically.
+            </p>
+          </li>
+          <li class="benefit-card">
+            <span class="benefit-card__icon" aria-hidden="true">🧮</span>
+            <h3 class="benefit-card__title">Calculation-Only Connectors</h3>
+            <p class="benefit-card__text">
+              Build connectors that perform calculations entirely inside the policy template – no external API needed.
+            </p>
+          </li>
+          <li class="benefit-card">
+            <span class="benefit-card__icon" aria-hidden="true">📋</span>
+            <h3 class="benefit-card__title">Ready-to-Use Examples</h3>
+            <p class="benefit-card__text">
+              Load working examples like the Dad Jokes connector and the VAT Calculation helper to get started quickly.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Step-by-Step Builder ───────────────────────────────────── -->
+    <section class="section" id="step-builder" aria-labelledby="builder-title">
+      <div class="container">
+        <h2 class="section__title" id="builder-title">Step-by-Step Builder</h2>
+        <p class="section__lead">
+          Follow the steps below to configure your connector. Your outputs will update as you progress.
+        </p>
+
+        <div class="builder-card">
+          <!-- Progress indicator -->
+          <nav aria-label="Builder steps">
+            <ol class="step-indicator" id="step-indicator" role="list">
+              <li class="step-indicator__item step-indicator__item--active" data-step="1" role="listitem" aria-current="step">
+                <span class="step-indicator__num">1</span>
+                <span class="step-indicator__label">Type</span>
+              </li>
+              <li class="step-indicator__item" data-step="2" role="listitem">
+                <span class="step-indicator__num">2</span>
+                <span class="step-indicator__label">Details</span>
+              </li>
+              <li class="step-indicator__item" data-step="3" role="listitem">
+                <span class="step-indicator__num">3</span>
+                <span class="step-indicator__label">Auth</span>
+              </li>
+              <li class="step-indicator__item" data-step="4" role="listitem">
+                <span class="step-indicator__num">4</span>
+                <span class="step-indicator__label">Actions</span>
+              </li>
+              <li class="step-indicator__item" data-step="5" role="listitem">
+                <span class="step-indicator__num">5</span>
+                <span class="step-indicator__label">Inputs</span>
+              </li>
+              <li class="step-indicator__item" data-step="6" role="listitem">
+                <span class="step-indicator__num">6</span>
+                <span class="step-indicator__label">Responses</span>
+              </li>
+              <li class="step-indicator__item" data-step="7" role="listitem">
+                <span class="step-indicator__num">7</span>
+                <span class="step-indicator__label">C# Logic</span>
+              </li>
+              <li class="step-indicator__item" data-step="8" role="listitem">
+                <span class="step-indicator__num">8</span>
+                <span class="step-indicator__label">YAML</span>
+              </li>
+              <li class="step-indicator__item" data-step="9" role="listitem">
+                <span class="step-indicator__num">9</span>
+                <span class="step-indicator__label">C# Code</span>
+              </li>
+              <li class="step-indicator__item" data-step="10" role="listitem">
+                <span class="step-indicator__num">10</span>
+                <span class="step-indicator__label">Copy</span>
+              </li>
+            </ol>
+          </nav>
+
+          <!-- Step 1: Connector Type -->
+          <div class="step-panel step-panel--active" id="step-1" role="region" aria-labelledby="step-1-title">
+            <h3 class="step-panel__title" id="step-1-title">Step 1 – Choose connector type</h3>
+            <p class="step-panel__description">
+              Select the type of connector you want to build. This determines the overall pattern of the generated code.
+            </p>
+            <div class="radio-group" role="radiogroup" aria-label="Connector type">
+              <label class="radio-option">
+                <input type="radio" name="connectorType" value="external" />
+                <span>
+                  <span class="radio-option__label">External API</span>
+                  <span class="radio-option__desc">Connects to a third-party REST API. The connector forwards requests and optionally transforms responses.</span>
+                </span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="connectorType" value="calculation" />
+                <span>
+                  <span class="radio-option__label">Calculation-only</span>
+                  <span class="radio-option__desc">No external API. All logic runs inside the C# policy template – useful for calculations and transformations.</span>
+                </span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="connectorType" value="hybrid" />
+                <span>
+                  <span class="radio-option__label">Hybrid</span>
+                  <span class="radio-option__desc">Calls an external API and also applies C# transformation logic to the request or response.</span>
+                </span>
+              </label>
+            </div>
+            <div class="step-nav">
+              <span></span>
+              <button class="btn btn--primary step-nav__btn" id="step-1-next">Next →</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Connector Name & Description -->
+          <div class="step-panel" id="step-2" role="region" aria-labelledby="step-2-title">
+            <h3 class="step-panel__title" id="step-2-title">Step 2 – Define connector name and description</h3>
+            <p class="step-panel__description">Give your connector a clear, descriptive name. This appears in the Power Platform connector list.</p>
+            <div class="form-group">
+              <label for="connector-name">Connector name <abbr title="required">*</abbr></label>
+              <input type="text" id="connector-name" placeholder="e.g. Dad Jokes Connector" autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label for="connector-description">Description</label>
+              <input type="text" id="connector-description" placeholder="e.g. Get random dad jokes from icanhazdadjoke.com" />
+            </div>
+            <div class="form-group">
+              <label for="connector-host">API host <abbr title="required">*</abbr></label>
+              <input type="text" id="connector-host" placeholder="e.g. icanhazdadjoke.com" />
+            </div>
+            <div class="form-group">
+              <label for="connector-base-path">Base path</label>
+              <input type="text" id="connector-base-path" value="/" placeholder="/" />
+            </div>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-2-prev">← Back</button>
+              <button class="btn btn--primary step-nav__btn" id="step-2-next">Next →</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Authentication -->
+          <div class="step-panel" id="step-3" role="region" aria-labelledby="step-3-title">
+            <h3 class="step-panel__title" id="step-3-title">Step 3 – Choose authentication pattern</h3>
+            <p class="step-panel__description">Select how your connector authenticates with the API.</p>
+            <div class="radio-group" role="radiogroup" aria-label="Authentication type">
+              <label class="radio-option">
+                <input type="radio" name="authType" value="none" checked />
+                <span>
+                  <span class="radio-option__label">No authentication</span>
+                  <span class="radio-option__desc">The API is publicly accessible without credentials.</span>
+                </span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="authType" value="apikey" />
+                <span>
+                  <span class="radio-option__label">API Key (header)</span>
+                  <span class="radio-option__desc">Authenticates using an API key passed in the <code>x-api-key</code> request header.</span>
+                </span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="authType" value="basic" />
+                <span>
+                  <span class="radio-option__label">Basic Authentication</span>
+                  <span class="radio-option__desc">Authenticates using a username and password encoded in the Authorization header.</span>
+                </span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="authType" value="oauth2" />
+                <span>
+                  <span class="radio-option__label">OAuth 2.0</span>
+                  <span class="radio-option__desc">Authenticates using OAuth 2.0 with Microsoft Azure AD as the authorisation server.</span>
+                </span>
+              </label>
+            </div>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-3-prev">← Back</button>
+              <button class="btn btn--primary step-nav__btn" id="step-3-next">Next →</button>
+            </div>
+          </div>
+
+          <!-- Step 4: Actions -->
+          <div class="step-panel" id="step-4" role="region" aria-labelledby="step-4-title">
+            <h3 class="step-panel__title" id="step-4-title">Step 4 – Add actions</h3>
+            <p class="step-panel__description">
+              Actions represent the individual API operations your connector exposes to Power Platform flows and apps.
+            </p>
+            <ul class="action-list" id="action-list" role="list" aria-label="Connector actions"></ul>
+            <button class="btn btn--ghost btn--sm" id="add-action-btn" type="button">+ Add action</button>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-4-prev">← Back</button>
+              <button class="btn btn--primary step-nav__btn" id="step-4-next">Next →</button>
+            </div>
+          </div>
+
+          <!-- Step 5: Inputs -->
+          <div class="step-panel" id="step-5" role="region" aria-labelledby="step-5-title">
+            <h3 class="step-panel__title" id="step-5-title">Step 5 – Configure inputs</h3>
+            <p class="step-panel__description">
+              Add parameters to each action. Parameters define what information the caller must provide.
+            </p>
+            <div id="inputs-container"></div>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-5-prev">← Back</button>
+              <button class="btn btn--primary step-nav__btn" id="step-5-next">Next →</button>
+            </div>
+          </div>
+
+          <!-- Step 6: Responses -->
+          <div class="step-panel" id="step-6" role="region" aria-labelledby="step-6-title">
+            <h3 class="step-panel__title" id="step-6-title">Step 6 – Configure responses</h3>
+            <p class="step-panel__description">
+              Define the response schema for each action. This tells Power Platform what data the connector returns.
+            </p>
+            <div id="responses-container"></div>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-6-prev">← Back</button>
+              <button class="btn btn--primary step-nav__btn" id="step-6-next">Next →</button>
+            </div>
+          </div>
+
+          <!-- Step 7: C# Logic -->
+          <div class="step-panel" id="step-7" role="region" aria-labelledby="step-7-title">
+            <h3 class="step-panel__title" id="step-7-title">Step 7 – Add optional C# logic</h3>
+            <p class="step-panel__description">
+              Add custom C# logic that runs inside the policy template. You can also use the Block Builder below.
+              Leave empty to use the default pass-through template.
+            </p>
+            <div class="notice notice--info" role="note">
+              <span aria-hidden="true">ℹ️</span>
+              <span>This code runs inside the <code>ExecuteAsync()</code> method. The input parameters have already been extracted. Build your result as a <code>JObject</code> named <code>result</code>.</span>
+            </div>
+            <div class="form-group">
+              <label for="csharp-logic">Custom C# logic</label>
+              <textarea id="csharp-logic" placeholder="// e.g.&#10;var result = new JObject { [&quot;message&quot;] = &quot;Hello, World!&quot; };"></textarea>
+            </div>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-7-prev">← Back</button>
+              <button class="btn btn--primary step-nav__btn" id="step-7-next">Generate YAML →</button>
+            </div>
+          </div>
+
+          <!-- Step 8: Generated YAML -->
+          <div class="step-panel" id="step-8" role="region" aria-labelledby="step-8-title">
+            <h3 class="step-panel__title" id="step-8-title">Step 8 – Generated YAML</h3>
+            <p class="step-panel__description">
+              Here is the OpenAPI 2.0 YAML for your connector. Import this file into Power Platform.
+            </p>
+            <pre class="code-preview" id="step-yaml-preview" aria-label="Generated YAML code"></pre>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-8-prev">← Back</button>
+              <button class="btn btn--primary step-nav__btn" id="step-8-next">Generate C# →</button>
+            </div>
+          </div>
+
+          <!-- Step 9: Generated C# -->
+          <div class="step-panel" id="step-9" role="region" aria-labelledby="step-9-title">
+            <h3 class="step-panel__title" id="step-9-title">Step 9 – Generated C# code</h3>
+            <p class="step-panel__description">
+              Here is the C# script for your connector's policy template. Paste this into the Code section of your connector.
+            </p>
+            <pre class="code-preview" id="step-csharp-preview" aria-label="Generated C# code"></pre>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-9-prev">← Back</button>
+              <button class="btn btn--primary step-nav__btn" id="step-9-next">Copy outputs →</button>
+            </div>
+          </div>
+
+          <!-- Step 10: Copy -->
+          <div class="step-panel" id="step-10" role="region" aria-labelledby="step-10-title">
+            <h3 class="step-panel__title" id="step-10-title">Step 10 – Copy your outputs</h3>
+            <p class="step-panel__description">
+              Your connector files are ready. Use the buttons below to copy each output to your clipboard.
+            </p>
+            <div class="notice notice--success" role="status">
+              <span aria-hidden="true">✅</span>
+              <span>Your connector configuration is complete! Copy the outputs below and follow the deployment guide in our documentation.</span>
+            </div>
+            <div class="flex-gap mb-3">
+              <button class="btn btn--primary copy-btn" id="copy-yaml-step" type="button" data-target="yaml">Copy YAML</button>
+              <button class="btn btn--primary copy-btn" id="copy-csharp-step" type="button" data-target="csharp">Copy C# code</button>
+              <button class="btn btn--ghost" id="reset-builder-btn" type="button">Start again</button>
+            </div>
+            <div class="step-nav">
+              <button class="btn btn--ghost step-nav__btn" id="step-10-prev">← Back</button>
+              <span></span>
+            </div>
+          </div>
+
+        </div><!-- /.builder-card -->
+      </div>
+    </section>
+
+    <!-- ── Block Builder ──────────────────────────────────────────── -->
+    <section class="section section--alt" id="block-builder-section" aria-labelledby="block-builder-title">
+      <div class="container">
+        <h2 class="section__title" id="block-builder-title">Visual Block Builder</h2>
+        <p class="section__lead">
+          Assemble your C# logic visually by clicking blocks from the palette. The generated code will appear in the output panel.
+        </p>
+
+        <div class="block-builder">
+          <!-- Palette -->
+          <aside class="block-palette" aria-label="Block palette">
+            <h3 class="block-palette__title">Available Blocks</h3>
+            <div id="block-palette-content"></div>
+          </aside>
+
+          <!-- Canvas -->
+          <div>
+            <div class="block-canvas" id="block-canvas" aria-label="Block canvas" aria-live="polite"></div>
+            <div class="flex-gap" style="margin-top:1rem;">
+              <button class="btn btn--primary btn--sm" id="apply-blocks-btn" type="button">Apply blocks to C# logic</button>
+              <button class="btn btn--ghost btn--sm" id="clear-blocks-btn" type="button">Clear canvas</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Generated Outputs ──────────────────────────────────────── -->
+    <section class="section" id="outputs" aria-labelledby="outputs-title">
+      <div class="container">
+        <h2 class="section__title" id="outputs-title">Generated Outputs</h2>
+        <p class="section__lead">
+          These panels update automatically as you configure your connector above.
+        </p>
+
+        <div class="output-panels">
+          <!-- YAML Panel -->
+          <article class="output-panel" aria-labelledby="yaml-panel-title">
+            <header class="output-panel__header">
+              <h3 class="output-panel__title" id="yaml-panel-title">
+                <span aria-hidden="true">📄</span> OpenAPI YAML
+              </h3>
+              <div class="output-panel__actions">
+                <button class="btn btn--sm btn--ghost copy-btn" id="copy-yaml-btn" type="button" data-target="yaml">Copy</button>
+                <button class="btn btn--sm btn--danger" id="reset-yaml-btn" type="button">Reset</button>
+              </div>
+            </header>
+            <div class="output-panel__body">
+              <pre id="yaml-output" aria-label="Generated YAML output"><code># Your YAML will appear here as you build your connector above.</code></pre>
+            </div>
+          </article>
+
+          <!-- C# Panel -->
+          <article class="output-panel" aria-labelledby="csharp-panel-title">
+            <header class="output-panel__header">
+              <h3 class="output-panel__title" id="csharp-panel-title">
+                <span aria-hidden="true">⚙️</span> C# Script
+              </h3>
+              <div class="output-panel__actions">
+                <button class="btn btn--sm btn--ghost copy-btn" id="copy-csharp-btn" type="button" data-target="csharp">Copy</button>
+                <button class="btn btn--sm btn--danger" id="reset-csharp-btn" type="button">Reset</button>
+              </div>
+            </header>
+            <div class="output-panel__body">
+              <pre id="csharp-output" aria-label="Generated C# output"><code>// Your C# script will appear here as you build your connector above.</code></pre>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Examples ───────────────────────────────────────────────── -->
+    <section class="section section--alt" id="examples" aria-labelledby="examples-title">
+      <div class="container">
+        <h2 class="section__title" id="examples-title">Examples</h2>
+        <p class="section__lead">
+          Load a working example to see the tool in action, or use it as a starting point for your own connector.
+        </p>
+
+        <div class="examples-grid">
+          <!-- Dad Jokes -->
+          <article class="example-card" aria-labelledby="example-dadjokes-title">
+            <h3 class="example-card__title" id="example-dadjokes-title">Dad Jokes Connector</h3>
+            <p class="example-card__description">
+              Connects to <a href="https://icanhazdadjoke.com/" target="_blank" rel="noopener noreferrer">icanhazdadjoke.com</a> to fetch random dad jokes.
+              Demonstrates a simple external API connector with no authentication.
+            </p>
+            <ul style="font-size:0.88rem; color:var(--ccb-neutral-600); margin:0 0 0.5rem; padding-left:1.25rem;">
+              <li>GET request with no parameters</li>
+              <li>Sets <code>Accept: application/json</code> header via C#</li>
+              <li>No authentication required</li>
+            </ul>
+            <div class="example-card__actions">
+              <button class="btn btn--primary btn--sm" id="load-dadjokes-yaml" type="button">Load YAML</button>
+              <button class="btn btn--ghost btn--sm" id="load-dadjokes-csharp" type="button">Load C#</button>
+            </div>
+          </article>
+
+          <!-- Calculation Only -->
+          <article class="example-card" aria-labelledby="example-vat-title">
+            <h3 class="example-card__title" id="example-vat-title">Calculation Helper (VAT)</h3>
+            <p class="example-card__description">
+              A calculation-only connector that computes VAT on a given amount.
+              No external API is called – all logic runs in the policy template.
+            </p>
+            <ul style="font-size:0.88rem; color:var(--ccb-neutral-600); margin:0 0 0.5rem; padding-left:1.25rem;">
+              <li>POST request with <code>amount</code> and <code>vatRate</code> body parameters</li>
+              <li>Input validation with error responses</li>
+              <li>Returns <code>vatAmount</code>, <code>totalAmount</code>, and a message</li>
+            </ul>
+            <div class="example-card__actions">
+              <button class="btn btn--primary btn--sm" id="load-vat-yaml" type="button">Load YAML</button>
+              <button class="btn btn--ghost btn--sm" id="load-vat-csharp" type="button">Load C#</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Site Footer ───────────────────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p>
+        Custom Connector Builder by <a href="https://mightora.io" target="_blank" rel="noopener noreferrer">Mightora</a>.
+        Open source on <a href="https://github.com/mightora/custom-connector-builder" target="_blank" rel="noopener noreferrer">GitHub</a>.
+      </p>
+      <p style="margin-top:0.5rem; font-size:0.8rem; opacity:0.75;">
+        Not affiliated with Microsoft. Power Platform is a trademark of Microsoft Corporation.
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/gh/mightora/shared-ui@main/components.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
