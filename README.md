@@ -56,7 +56,7 @@ npm install
 
 # 3. Start the development server
 npm run dev
-```
+``` 
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
