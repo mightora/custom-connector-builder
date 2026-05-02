@@ -13,7 +13,7 @@ export function buildYaml(config) {
   const {
     connectorName = 'My Connector',
     description = '',
-    host = 'example.com',
+    host = 'api.local',
     basePath = '/',
     authType = 'none',
     actions = []

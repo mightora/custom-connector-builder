@@ -6,7 +6,7 @@ export const calculationOnlyExample = {
   config: {
     connectorName: 'Calculation Helper',
     description: 'Perform common calculations without calling an external API.',
-    host: 'localhost',
+    host: 'api.local',
     basePath: '/',
     authType: 'none',
     actions: [

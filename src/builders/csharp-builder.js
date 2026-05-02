@@ -4,6 +4,7 @@
  * @param {string} config.connectorName
  * @param {string} config.operationId
  * @param {Array}  config.inputs  - [{ name, type }]
+ * @param {Array}  config.outputs - [{ name, type }]
  * @param {string} config.csharpLogic - custom logic snippet
  * @returns {string} C# code string
  */
@@ -12,6 +13,7 @@ export function buildCSharp(config) {
     connectorName = 'My Connector',
     operationId = 'ExecuteOperation',
     inputs = [],
+    outputs = [],
     csharpLogic = ''
   } = config
 
@@ -31,15 +33,41 @@ export function buildCSharp(config) {
     })
     .join('\n')
 
+  const outputAssignments = (outputs.length ? outputs : [{ name: 'Value2', type: 'string' }])
+    .map((o) => {
+      const outputName = o.name || 'Value2'
+      const outputVar = toCamelCase(outputName)
+      const matchingInput = inputs.find((p) => (p.name || '').toLowerCase() === outputName.toLowerCase())
+
+      if (matchingInput) {
+        return `            ["${outputName}"] = ${toCamelCase(matchingInput.name || 'input')},`
+      }
+
+      if (outputName.toLowerCase() === 'message' || outputName.toLowerCase() === 'value2') {
+        return `            ["${outputName}"] = "Success",`
+      }
+
+      return `            ["${outputName}"] = string.Empty,`
+    })
+    .join('\n')
+
+  const inputEchoAssignments = inputs
+    .map((p) => {
+      const varName = toCamelCase(p.name || 'input')
+      return `            ["${p.name}"] = ${varName},`
+    })
+    .join('\n')
+
   const customLogicBlock = csharpLogic.trim()
     ? csharpLogic
         .split('\n')
         .map((l) => `            ${l}`)
         .join('\n')
-    : `            // TODO: Add your custom logic here
+    : `            // Build response from configured outputs and echo inputs for debugging
             var result = new JObject
             {
-                ["message"] = "Success"
+${outputAssignments}
+${inputEchoAssignments ? `${inputEchoAssignments}\n` : ''}                ["debug"] = "Inputs echoed for troubleshooting"
             };`
 
   return `// ${connectorName} - ${operationId}
@@ -50,8 +78,10 @@ public class Script : ScriptBase
 {
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
-        // Read the incoming request body
+    // Step 1: Read
         var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+    // Step 2: Parse
         JObject input;
         try
         {
@@ -62,13 +92,13 @@ public class Script : ScriptBase
             input = new JObject();
         }
 
-        // Extract input parameters
+        // Step 3: Read value
 ${extractInputs || '            // No parameters defined'}
 
-        // Custom logic
+        // Step 4: Build response
 ${customLogicBlock}
 
-        // Build and return the response
+        // Step 5: Return response
         var responseContent = result.ToString();
         var response = new HttpResponseMessage(HttpStatusCode.OK)
         {
