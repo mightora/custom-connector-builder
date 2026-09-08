@@ -5,31 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Build Power Platform custom connectors powered by C# scripting. All logic runs in the policy template — no external API required." />
   <title>Custom Connector Builder – Mightora</title>
+  <script>
+    // Intercept fetch requests to footer.yaml and correct CDN file indentation issues
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+      const url = args[0];
+      if (typeof url === 'string' && url.includes('footer.yaml')) {
+        try {
+          const response = await originalFetch.apply(this, args);
+          if (!response.ok) return response;
+          const originalText = await response.text();
+          
+          // Fix indentation bug on line 41 (which causes issues for js-yaml)
+          const lines = originalText.split(/\r?\n/);
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith('    - title: "Mightora"')) {
+              lines[i] = '  - title: "Mightora"';
+              let j = i + 1;
+              while (j < lines.length && lines[j].startsWith('      ')) {
+                lines[j] = '    ' + lines[j].slice(6);
+                j++;
+              }
+            }
+          }
+          const correctedText = lines.join('\n');
+          
+          return new Response(correctedText, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+          });
+        } catch (err) {
+          console.warn('Failed to intercept and patch footer.yaml', err);
+        }
+      }
+      return originalFetch.apply(this, args);
+    };
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/mightora/shared-ui@main/shared.css" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    // Configure mermaid to auto start as false to let us manually initialize on demands
+    if (window.mermaid) {
+      mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    }
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <!-- ── Site Header ──────────────────────────────────────────── -->
-  <header role="banner">
-    <mightora-header
-      site-name="Custom Connector Builder"
-      site-url="/"
-      logo-light="https://cdn.jsdelivr.net/gh/mightora/shared-ui@main/main-logo.png"
-      logo-dark="https://cdn.jsdelivr.net/gh/mightora/shared-ui@main/main-logo.png"
-      nav-links='[
-        {"label":"Prompt Builder","url":"#gpt-prompt"},
-        {"label":"Mightora.io ↗","url":"https://mightora.io","ext":true}
-      ]'>
-    </mightora-header>
-  </header>
+  <mightora-header
+    site-name="Custom Connector Builder"
+    site-url="/"
+    logo-light="https://raw.githubusercontent.com/mightora/mightora.io/main/static/images/mightoraIoLogo4-200x900.png"
+    logo-dark="https://raw.githubusercontent.com/mightora/mightora.io/main/static/images/mightoraIoLogo4-200x900.png"
+    nav-links='[
+      {"label":"How It Works","url":"/#how-it-works"},
+      {"label":"Prompt Builder","url":"/#gpt-prompt"},
+      {"label":"Sample Connectors","url":"/#sample-connectors"},
+      {"label":"Mightora.io ↗","url":"https://mightora.io","ext":true}
+    ]'>
+  </mightora-header>
 
   <main id="main-content">
-
+    <div id="home-view">
     <!-- ── Hero ─────────────────────────────────────────────────── -->
     <section class="hero" aria-labelledby="hero-title">
       <div class="container">
@@ -87,6 +133,58 @@
         <div class="prompt-workbench">
           <article class="prompt-card" aria-labelledby="prompt-inputs-title">
             <h3 class="prompt-card__title" id="prompt-inputs-title">Prompt Inputs</h3>
+
+            <div class="form-group">
+              <label for="prompt-preset">Load a Sample Preset Pattern</label>
+              <select id="prompt-preset" class="prompt-preset-select">
+                <option value="custom" selected>-- Custom / Keep Current Inputs --</option>
+                <option value="math-utility">Local logic: Mathematical Utility (Area & Perimeter calculations)</option>
+                <option value="text-formatter">Local logic: Advanced Text Formatter (Formatting & Casing)</option>
+                <option value="header-auth">External API: Header API Key Injector (Proxy authentication)</option>
+                <option value="payload-filter">External API: Response Filter & Reducer (Proxy response payload editing)</option>
+              </select>
+              <p class="helper-text">Select a pre-designed pattern to instantly configure the inputs for demonstration.</p>
+            </div>
+
+            <hr class="prompt-divider" />
+            
+            <div class="prompt-grid-2">
+              <div class="form-group">
+                <label for="prompt-connector-name">Connector Title</label>
+                <input type="text" id="prompt-connector-name" value="Custom Utility" placeholder="e.g. Stripe Sync, Date Calculator" />
+              </div>
+              <div class="form-group">
+                <label for="prompt-operation-id">Operation ID / Action Name</label>
+                <input type="text" id="prompt-operation-id" value="ExecuteAction" placeholder="e.g. SyncCharges, CalculateDuration" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Execution Mode / Connector Type</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="connector-type" id="mode-local" value="local" checked />
+                  <div>
+                    <span class="radio-option__label">Local logic only (api.local)</span>
+                    <span class="radio-option__desc">The custom C# script handles everything internally. No external API endpoint is called. Suitable for utilities, parsers, and standalone calculation engines.</span>
+                  </div>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="connector-type" id="mode-external" value="external" />
+                  <div>
+                    <span class="radio-option__label">External endpoint execution</span>
+                    <span class="radio-option__desc">The connector routes requests to an external service. The custom script intercepts, optionally modifies headers/parameters, forwards the request, and transforms the returned API response.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group" id="host-name-container">
+              <label for="prompt-host-name">External Hostname</label>
+              <input type="text" id="prompt-host-name" value="api.example.com" placeholder="e.g. api.stripe.com,api.weatherapi.com" />
+              <p class="helper-text">The domain name of the API endpoint. Do not include schemes (https://) or paths.</p>
+            </div>
+
             <div class="form-group">
               <label for="prompt-values-in">Input fields (comma-separated)</label>
               <input type="text" id="prompt-values-in" value="Value1" placeholder="Value1, ValueA, CustomerId" />
@@ -120,21 +218,107 @@
       </div>
     </section>
 
+    <!-- ── Sample Connectors ─────────────────────────────────────── -->
+    <section class="section section--alt" id="sample-connectors" aria-labelledby="sample-connectors-title">
+      <div class="container">
+        <h2 class="section__title" id="sample-connectors-title">Sample Connectors</h2>
+        <p class="section__lead">
+          Explore production-ready custom connector designs. Each includes a detailed architectural breakdown, OpenAPI Swagger 2.0 configuration, complete C# custom policy code, and an interactive live sandbox to test-drive their logic.
+        </p>
+        <div class="examples-grid" id="connectors-grid">
+          <!-- Dynamically generated connector list cards -->
+        </div>
+      </div>
+    </section>
+
+    </div><!-- End #home-view -->
+
+    <!-- ── Connector Detail View ────────────────────────────────── -->
+    <div id="connector-view" class="hidden-view">
+      <!-- ── Dynamic Sticky Jump Nav for Connector ──────────────── -->
+      <nav class="quick-jump-nav" id="connector-quick-nav" aria-label="Connector Sections Quick Jump">
+        <div class="container quick-jump-nav__container" id="connector-quick-nav-links">
+          <!-- Dynamically populated links -->
+        </div>
+      </nav>
+
+      <section class="connector-hero">
+        <div class="container">
+          <nav aria-label="Breadcrumb" class="mb-2">
+            <a href="#" class="btn-back">← Back to Custom Connector Builder</a>
+          </nav>
+          <h1 class="connector-hero__title" id="connector-title">Connector Title</h1>
+          <p class="connector-hero__description" id="connector-description">Connector Description</p>
+        </div>
+      </section>
+
+      <div class="container py-4">
+        <div class="connector-layout">
+          <!-- Left side: Markdown details -->
+          <article class="connector-markdown" id="connector-markdown-content">
+            <!-- Markdown content rendered dynamically -->
+          </article>
+
+          <!-- Right side: Sandbox / Helper Tool -->
+          <aside class="connector-interactive">
+            <div class="interactive-card">
+              <div class="interactive-card__header">
+                <h2 class="interactive-card__title">Interactive Sandbox</h2>
+                <p class="interactive-card__subtitle">Test-drive this custom connector logic live in the browser.</p>
+              </div>
+              <div class="interactive-card__body" id="connector-sandbox-container">
+                <!-- Sandbox tool injected here based on active connector -->
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div><!-- End #connector-view -->
+
   </main>
 
-  <!-- ── Site Footer ───────────────────────────────────────────── -->
-  <footer class="site-footer" role="contentinfo">
-    <div class="container">
-      <p>
-        Custom Connector Builder by <a href="https://mightora.io" target="_blank" rel="noopener noreferrer">Mightora</a>.
-        Open source on <a href="https://github.com/mightora/custom-connector-builder" target="_blank" rel="noopener noreferrer">GitHub</a>.
-      </p>
-      <p class="site-footer__note">
-        Not affiliated with Microsoft. Power Platform is a trademark of Microsoft Corporation.
-      </p>
+  <!-- ── Built By Author Section ── -->
+  <mightora-author>
+    <div class="author-section-overlay">
+      <div class="author-section-inner">
+        <div class="author-photos">
+          <img src="https://techtweedie.github.io/images/author/ian-tweedie-sq2_hu_a380911c6f4726de.png" alt="Ian Tweedie" class="author-avatar" />
+          <img src="https://raw.githubusercontent.com/TechTweedie/techtweedie.github.io/v2/assets/images/site/main-logo.png" alt="TechTweedie" class="author-blog-logo" />
+        </div>
+        <div class="author-text">
+          <h2 class="author-heading">Built by TechTweedie</h2>
+          <p class="author-bio">
+            Custom Connector Builder is a free tool created by <strong>Ian Tweedie</strong> — also known online as <strong>TechTweedie</strong>. Ian is a technology consultant and developer based in North East England with a background in enterprise IT, cloud infrastructure, and developer tooling. He builds free, practical tools and writes about technology on his blog.
+          </p>
+          <div class="author-links">
+            <a href="https://techtweedie.github.io" target="_blank" rel="noopener" class="author-link">
+              <i class="fas fa-blog"></i> Blog
+            </a>
+            <a href="https://github.com/itweedie" target="_blank" rel="noopener" class="author-link">
+              <i class="fab fa-github"></i> GitHub
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
-  </footer>
+  </mightora-author>
 
+  <!-- ── Site Footer ───────────────────────────────────────────── -->
+  <mightora-footer>
+    <div class="container">
+      <div class="footer-bottom">
+        <div class="footer-copy">
+          Custom Connector Builder by <a href="https://mightora.io" target="_blank" rel="noopener noreferrer">Mightora</a>.
+          Open source on <a href="https://github.com/mightora/custom-connector-builder" target="_blank" rel="noopener noreferrer">GitHub</a>.
+        </div>
+        <div class="footer-bottom-links">
+          <span class="site-footer__note">Not affiliated with Microsoft. Power Platform is a trademark of Microsoft Corporation.</span>
+        </div>
+      </div>
+    </div>
+  </mightora-footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/mightora/shared-ui@main/components.js"></script>
   <script type="module" src="main.js"></script>
 </body>
