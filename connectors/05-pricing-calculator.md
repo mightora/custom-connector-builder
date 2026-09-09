@@ -82,6 +82,7 @@ paths:
       summary: Calculate Price
       description: Calculates a price based on product, region, customer type and other pricing rules.
       operationId: CalculatePrice
+      x-ms-visibility: important
 
       parameters:
         - name: body

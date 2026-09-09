@@ -79,6 +79,7 @@ paths:
       summary: Test Regular Expression
       description: Tests a regular expression against the supplied data.
       operationId: TestRegex
+      x-ms-visibility: important
 
       parameters:
         - name: body

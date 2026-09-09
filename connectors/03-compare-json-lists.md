@@ -121,6 +121,7 @@ paths:
       summary: Compare JSON Lists
       description: Compares two JSON arrays containing objects with the same set of properties.
       operationId: CompareJsonLists
+      x-ms-visibility: important
 
       parameters:
         - name: body

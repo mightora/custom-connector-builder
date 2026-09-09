@@ -83,6 +83,7 @@ paths:
       summary: Calculate Price or Score
       description: Applies business rules to calculate either a price or a score.
       operationId: CalculateBusinessRules
+      x-ms-visibility: important
 
       parameters:
         - name: body

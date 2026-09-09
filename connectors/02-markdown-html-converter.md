@@ -86,6 +86,7 @@ paths:
       summary: Convert Markdown and HTML
       description: Converts Markdown to HTML or HTML to Markdown.
       operationId: ConvertContent
+      x-ms-visibility: important
 
       parameters:
         - name: body

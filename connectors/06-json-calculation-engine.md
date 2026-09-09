@@ -174,6 +174,7 @@ paths:
       summary: Calculate JSON Data
       description: Applies sequential calculations to JSON records and optionally calculates aggregate values.
       operationId: CalculateJsonData
+      x-ms-visibility: important
 
       parameters:
         - name: body
