@@ -2,6 +2,12 @@ import { load as parseYaml } from 'js-yaml'
 
 export const STUDIO_STORAGE_KEY = 'mightora-connector-studio-v1'
 
+// Monaco's desktop-first editing surface is awkward on small touch screens.
+// Keep the same project, tests and exports with a native textarea on phones.
+export function prefersMobileEditor(userAgent, narrowTouchScreen) {
+  return /iPhone|iPod/i.test(userAgent || '') || Boolean(narrowTouchScreen)
+}
+
 export const DEFAULT_PROJECT = {
   name: 'Text transformation',
   files: {

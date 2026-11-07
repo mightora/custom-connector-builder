@@ -1671,3 +1671,51 @@ code {
 #host-name-container {
   display: none;
 }
+
+/* ── Small-screen / iPhone layout ──────────────────────────────
+   Avoid fixed-width grid tracks and iOS Safari's focus zoom. */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .section { padding: 3rem 0; }
+  .hero { padding: 3.5rem 0 3rem; }
+
+  .process-grid,
+  .benefits-grid,
+  .examples-grid,
+  .action-item__fields,
+  .prompt-grid-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .param-item {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  .param-item > * { min-width: 0; }
+
+  .quick-jump-nav__container {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    gap: .4rem;
+  }
+  .quick-jump-nav__link,
+  .quick-jump-nav__title { white-space: nowrap; flex-shrink: 0; }
+
+  /* Inputs smaller than 16px trigger unexpected page zoom on iOS Safari. */
+  #main-content input,
+  #main-content select,
+  #main-content textarea { font-size: 16px; }
+}
+
+@media (max-width: 380px) {
+  .container { padding-left: .75rem; padding-right: .75rem; }
+  .example-card, .benefit-card, .process-card { padding: 1rem; }
+  .section { padding: 2.5rem 0; }
+}

@@ -1,16 +1,7 @@
-import * as monaco from 'monaco-editor'
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker.js?worker'
-import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker.js?worker'
 import JSZip from 'jszip'
-import { DEFAULT_PROJECT, STUDIO_STORAGE_KEY, copyProject, analyseScript, validateOpenApi, runMockPreview } from './studio-logic.js'
+import { DEFAULT_PROJECT, STUDIO_STORAGE_KEY, copyProject, analyseScript, validateOpenApi, runMockPreview, prefersMobileEditor } from './studio-logic.js'
 import { runCSharp } from './csharp-runtime.js'
 import './studio.css'
-
-self.MonacoEnvironment = {
-  getWorker(_moduleId, label) {
-    return label === 'json' ? new jsonWorker() : new editorWorker()
-  }
-}
 
 const FILES = ['script.csx', 'openapi.yaml', 'request.json', 'expected.json']
 const LANGUAGES = { 'script.csx': 'csharp', 'openapi.yaml': 'yaml', 'request.json': 'json', 'expected.json': 'json' }
@@ -78,6 +69,7 @@ function presentJSON(value) { return JSON.stringify(value, null, 2) }
 
 let project = safeStorageRead() || sampleProject('text')
 let editor
+let monaco
 let activeFile = 'script.csx'
 let saveTimer
 let initialised = false
@@ -159,7 +151,7 @@ function refreshDiagnostics() {
       return li
     }))
   }
-  if (models.has('script.csx')) {
+  if (monaco && models.has('script.csx')) {
     monaco.editor.setModelMarkers(models.get('script.csx'), 'mightora', issues.filter(x => x.file === 'script.csx' && ['error', 'warning'].includes(x.severity)).map(x => ({
       startLineNumber: x.line || 1, endLineNumber: x.line || 1, startColumn: 1, endColumn: 2,
       severity: x.severity === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning, message: x.message
@@ -323,10 +315,40 @@ async function sendHttpRequest() {
   finally { clearTimeout(timer) }
 }
 
-function setupEditor() {
+function setupBasicEditor(host) {
+  host.hidden = true
+  const fallback = document.getElementById('studio-editor-fallback')
+  fallback.hidden = false
+  fallback.value = project.files[activeFile]
+  fallback.addEventListener('input', () => {
+    project.files[activeFile] = fallback.value
+    queueSave()
+    refreshDiagnostics()
+  })
+}
+
+async function setupEditor() {
   const host = document.getElementById('studio-editor')
   if (editor || !host) return
+  const isPhone = prefersMobileEditor(navigator.userAgent, window.matchMedia('(max-width: 767px) and (pointer: coarse)').matches)
+  if (isPhone) {
+    setupBasicEditor(host)
+    return
+  }
   try {
+    // Keep the large Monaco bundle off iPhones. Editor/test/ZIP features work
+    // with the lighter native textarea on those devices.
+    const [monacoModule, editorWorkerModule, jsonWorkerModule] = await Promise.all([
+      import('monaco-editor'),
+      import('monaco-editor/esm/vs/editor/editor.worker.js?worker'),
+      import('monaco-editor/esm/vs/language/json/json.worker.js?worker')
+    ])
+    monaco = monacoModule
+    self.MonacoEnvironment = {
+      getWorker(_moduleId, label) {
+        return label === 'json' ? new jsonWorkerModule.default() : new editorWorkerModule.default()
+      }
+    }
     for (const file of FILES) {
       const model = monaco.editor.createModel(project.files[file], LANGUAGES[file], monaco.Uri.parse(`inmemory://mightora/${file}`))
       models.set(file, model)
@@ -345,15 +367,7 @@ function setupEditor() {
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => persist())
   } catch (error) {
     console.warn('Monaco editor unavailable; using the accessible textarea fallback', error)
-    host.hidden = true
-    const fallback = document.getElementById('studio-editor-fallback')
-    fallback.hidden = false
-    fallback.value = project.files[activeFile]
-    fallback.addEventListener('input', () => {
-      project.files[activeFile] = fallback.value
-      queueSave()
-      refreshDiagnostics()
-    })
+    setupBasicEditor(host)
   }
 }
 

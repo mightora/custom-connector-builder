@@ -1815,6 +1815,21 @@ function initSampleConnectors() {
 
 // ── Initialise ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // The shared Mightora header changes height when its hamburger menu/layout
+  // switches at phone widths; keep sticky navigation offsets accurate.
+  const header = document.querySelector('mightora-header')
+  if (header) {
+    const updateHeaderHeight = () => {
+      const height = Math.ceil(header.getBoundingClientRect().height)
+      if (height > 0) {
+        document.documentElement.style.setProperty('--header-h', `${height}px`)
+        document.documentElement.style.setProperty('--studio-header-height', `${height}px`)
+      }
+    }
+    updateHeaderHeight()
+    if ('ResizeObserver' in window) new ResizeObserver(updateHeaderHeight).observe(header)
+    window.addEventListener('resize', updateHeaderHeight, { passive: true })
+  }
   initGptPromptBuilder()
   initSampleConnectors()
   handleNavigation()

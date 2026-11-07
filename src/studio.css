@@ -132,3 +132,57 @@ html { scroll-padding-top: calc(var(--studio-header-height) + 50px); }
   .studio-promo .btn { margin-top: .75rem; }
   .studio-editor-holder, .studio-editor-fallback { height: 390px; }
 }
+
+/* Touch-first Studio: keep the IDE within the viewport in both iPhone
+   portrait and landscape, without a large sticky toolbar over the keyboard. */
+@media (max-width: 768px) {
+  .studio-toolbar { position: relative; top: auto; z-index: 10; }
+  .studio-toolbar__inner {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .55rem;
+  }
+  .studio-project-select, .studio-toolbar__status, #studio-export {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .studio-project-select { min-width: 0; margin: 0; justify-content: space-between; }
+  .studio-project-select select { flex: 1; max-width: none; min-width: 0; }
+  #studio-new, .studio-file-input, #studio-export { width: 100%; min-height: 44px; }
+  .studio-toolbar__status { text-align: left; margin: 0; }
+
+  .studio-workspace { display: flex; flex-direction: column; min-height: 0; }
+  .studio-workspace > * { min-width: 0; width: 100%; }
+  .studio-explorer { border-radius: 10px 10px 0 0; padding: .5rem 0; }
+  .studio-panel-label, .studio-explorer-title, .studio-explorer-help { display: none; }
+  .studio-files {
+    display: flex; flex-direction: row; flex-wrap: nowrap;
+    overflow-x: auto; max-width: 100%; gap: .15rem;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .studio-file {
+    flex: 0 0 auto; min-height: 44px; white-space: nowrap;
+    border-left: 0; border-bottom: 3px solid transparent;
+    padding: .55rem .75rem;
+  }
+  .studio-file.is-active { border-bottom-color: var(--studio-blue); }
+  .studio-code { border-left: 1px solid var(--studio-border); border-right: 1px solid var(--studio-border); }
+  .studio-code-top { border-radius: 0; }
+  .studio-editor-holder, .studio-editor-fallback { height: 380px; }
+  .studio-editor-fallback {
+    min-width: 0; max-width: 100%; font-size: 16px; line-height: 1.5;
+    border-radius: 0; -webkit-overflow-scrolling: touch;
+  }
+  .studio-inspector { border-left: 1px solid var(--studio-border); border-radius: 0 0 10px 10px; }
+  .studio-inspector-content { min-width: 0; }
+  .studio-intro h1 { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 380px) {
+  .studio-toolbar__inner { padding-left: .75rem; padding-right: .75rem; }
+  .studio-workspace { padding-left: .75rem; padding-right: .75rem; }
+  .studio-intro h1 { font-size: 1.85rem; }
+  .studio-inspector-content { padding: .65rem; }
+  .studio-editor-holder, .studio-editor-fallback { height: 350px; }
+}

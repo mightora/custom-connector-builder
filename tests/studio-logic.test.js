@@ -1,8 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { DEFAULT_PROJECT, analyseScript, validateOpenApi, runMockPreview } from '../src/studio-logic.js'
+import { DEFAULT_PROJECT, analyseScript, validateOpenApi, runMockPreview, prefersMobileEditor } from '../src/studio-logic.js'
 
 const fixture = DEFAULT_PROJECT.files
+
+test('iPhones and narrow touch screens use the native mobile editor', () => {
+  assert.equal(prefersMobileEditor('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)', false), true)
+  assert.equal(prefersMobileEditor('Mozilla/5.0 (iPod; CPU iPhone OS 16_0)', false), true)
+  assert.equal(prefersMobileEditor('Android Chrome', true), true)
+  assert.equal(prefersMobileEditor('Desktop Chrome', false), false)
+})
 
 test('baseline script has no structural errors and matches the expected response', () => {
   assert.equal(analyseScript(fixture['script.csx']).filter(item => item.severity === 'error').length, 0)

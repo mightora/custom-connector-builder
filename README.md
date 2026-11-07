@@ -12,6 +12,7 @@ Built and maintained by [Mightora](https://mightora.io). Deployed to GitHub Page
 Visit the **Connector Studio** navigation entry (`#/studio`) to access:
 
 - A Monaco/VS Code-style editor with C#, YAML and JSON file tabs.
+- A native, touch-friendly editor on iPhone and other narrow touch devices, avoiding the large Monaco download and Safari focus-zoom behaviour while retaining the same files, tests, autosave and exports.
 - Starter projects for local transformations and external API proxies.
 - Basic C# structural diagnostics and Swagger 2.0 YAML checks.
 - A deliberately constrained **local mock preview**, limited to familiar `JObject` output patterns with string extraction, trimming, changing case and interpolation; it rejects unsupported control flow and backend calls rather than reporting fabricated passes.
