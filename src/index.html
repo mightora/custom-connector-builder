@@ -226,7 +226,7 @@
         <div>
           <p class="studio-eyebrow">New · Local development workbench</p>
           <h2 id="studio-promo-heading">Write, inspect and test connector scripts in your browser.</h2>
-          <p>Connector Studio combines a VS Code-style editor, Swagger validation, test fixtures, local mock transformation previews, and a downloadable project bundle. Your source stays in your browser unless you explicitly make a live API request.</p>
+          <p>Connector Studio combines a VS Code-style editor, Swagger validation, test fixtures, local previews, experimental C# execution with .NET WebAssembly, and a downloadable project bundle. Your source stays in your browser unless your code or an optional live API test makes a network request.</p>
         </div>
         <a href="#/studio" class="btn btn--primary">Launch Connector Studio</a>
       </div>
@@ -333,7 +333,7 @@
           </div>
           <div class="studio-explorer-help">
             <strong>How this works</strong>
-            <p>Edit C# and fixtures, then inspect diagnostics or run a supported mock transformation. No source code is uploaded.</p>
+            <p>Edit C# and fixtures, then run a mock transformation or compile with experimental in-browser Roslyn. No source is sent to a compiler service.</p>
             <a href="https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code" target="_blank" rel="noopener">Microsoft C# documentation ↗</a>
           </div>
         </aside>
@@ -357,10 +357,12 @@
             <button type="button" data-studio-panel="diagnostics" role="tab" aria-selected="false">DIAGNOSTICS <span id="studio-issue-count">0</span></button>
           </div>
           <div id="studio-tests-panel" class="studio-inspector-content">
-            <div class="studio-info-box"><strong>Mock preview · C# subset</strong><p>This runs a limited, deterministic interpretation of simple JObject transformations. It does <em>not</em> compile or execute C# or reproduce Microsoft's hosted runtime. Unsupported code is reported as such.</p></div>
+            <div class="studio-info-box"><strong>Experimental C# compiler · Runs in your browser</strong><p>Compile and run real C# using Roslyn and .NET WebAssembly. First use downloads about 40 MB of runtime assets. A limited ScriptBase and JObject test adapter is provided; this is <em>not</em> Microsoft's hosted connector runtime. Browser workers are not a security sandbox; do not paste secrets or untrusted scripts.</p></div>
             <div class="studio-test-row"><span class="studio-test-icon">01</span><div><strong>Request fixture</strong><small>request.json</small></div><span class="studio-test-mark">JSON</span></div>
             <div class="studio-test-row"><span class="studio-test-icon">02</span><div><strong>Expected response</strong><small>expected.json</small></div><span class="studio-test-mark">JSON</span></div>
             <button id="studio-run-test" class="studio-run" type="button">▶ Run mock test</button>
+            <button id="studio-run-csharp" class="studio-run studio-run--csharp" type="button">▶ Compile &amp; run C# (experimental)</button>
+            <p id="studio-csharp-progress" class="studio-runtime-progress" role="status" aria-live="polite">C# compiler loads only when you choose to run it.</p>
             <div id="studio-test-status" class="studio-result-heading" aria-live="polite">Ready to test</div>
             <div id="studio-test-output" class="studio-result-output">Select Run mock test to see a structured result and trace.</div>
             <details class="studio-live-details"><summary>Live HTTP request (optional)</summary>
@@ -386,7 +388,7 @@
       </div>
 
       <div class="container studio-bottom-note">
-        <strong>Privacy and limits.</strong> Code, OpenAPI files and mock fixtures remain local in this browser and can be exported. Only optional live HTTP calls contact an API. The browser downloads dependencies for the online editor and the site may load Mightora's shared branding and production analytics. Check Developer Tools → Network to inspect requests; built-in monitoring is not a security audit. For full C# compiler errors and platform-specific connector behaviour, test in a local .NET project and a Power Platform test environment.
+        <strong>Privacy and limits.</strong> Your code and fixtures are processed locally and can be exported; running untrusted C# can still trigger browser network access. The browser downloads editor and compiler dependencies, and the site may load Mightora shared branding and production analytics. Check Developer Tools → Network to inspect requests; this is not a security audit. For platform-specific connector behaviour, test in a local .NET project and a Power Platform test environment.
       </div>
     </div><!-- End #studio-view -->
 

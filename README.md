@@ -15,18 +15,26 @@ Visit the **Connector Studio** navigation entry (`#/studio`) to access:
 - Starter projects for local transformations and external API proxies.
 - Basic C# structural diagnostics and Swagger 2.0 YAML checks.
 - A deliberately constrained **local mock preview**, limited to familiar `JObject` output patterns with string extraction, trimming, changing case and interpolation; it rejects unsupported control flow and backend calls rather than reporting fabricated passes.
+- An **experimental in-browser C# run** using the Roslyn compiler and .NET WebAssembly via [WasmSharp](https://github.com/JakeYallop/WasmSharp). The first run downloads the runtime, and execution happens on the visitor's device in a web worker, without submitting code to a compiler API.
 - Editable request and expected-response JSON fixtures with an output comparison and trace.
 - Optional direct HTTPS API requests, subject to browser CORS restrictions and a per-request confirmation.
 - Browser-local autosave, import of `.csx`, `.cs`, `.yaml`, `.json` and recognised project ZIPs, and project ZIP export.
 - Direct transfer of generated C# baselines and reference connector code into Studio.
 
-### Important execution limitation
+### Important C# execution limitations
 
-**Connector Studio does not compile or run arbitrary C#.** The local preview uses a carefully limited JavaScript interpretation of supported script patterns. Passing a mock preview is not evidence that C# compiles, that code behaves the same in the Microsoft connector runtime, or that an actual connector authentication/backend call works. Scripts containing branches, HTTP calls or unsupported expressions are explicitly marked unsupported. For complete validation, compile with Microsoft's supporting `ScriptBase` types and test the connector in a Power Platform development environment. See [Microsoft custom connector C# guidance](https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code).
+Connector Studio has **two separate test engines**:
 
-All editing, diagnostics and local mock previews run on the visitor's device. An optional live API request contacts the chosen endpoint directly and requires CORS. The online site also loads shared Mightora resources, the editor bundle, and production-only Cloudflare analytics. No embedded credential broker or general-purpose code-execution service is supplied. Do not include secrets in exported or persisted source code.
+1. **Run mock test** uses a deliberately limited JavaScript interpreter. It does not compile or execute C#.
+2. **Compile & run C#** runs actual C# with Roslyn and .NET WebAssembly. To make scripts compile without a Power Platform connection, it provides a *partial local shim* for `ScriptBase`, `ScriptContext`, `Context.SendAsync` and basic `Newtonsoft.Json.Linq.JObject` syntax. This is not the official Microsoft connector library or the actual connector host. `Context.SendAsync` echoes the outgoing request body and does not call an API; other runtime features or Newtonsoft constructs may not compile. Passing a fixture test does not certify the connector, its authentication or backend interactions. Run a genuine integration test in a Power Platform development environment before deployment.
 
-**Offline note:** the current Monaco-based edition is a multi-file static application that requires hosting and currently does not have a fully self-contained `file://` distribution. A portable, limited-feature offline edition is future work. Do not use the presence of local autosave to infer full offline availability.
+Experimental C# execution has not yet been verified across every supported browser and script pattern. The runtime may require modern WebAssembly features and downloads roughly 40 MB of assets. Browser workers improve responsiveness but **do not provide a security boundary**: execute only scripts you trust and never paste credentials. WebAssembly execution is not automatically killed after a deadline; reload the page if a script loops or hangs. See [Microsoft custom connector C# guidance](https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code).
+
+All editing, diagnostics, mock previews and C# browser compilation run on the visitor's device. An optional live API request contacts the chosen endpoint directly and requires CORS. The C# runtime may have access to browser networking APIs, so it should not be treated as an isolated sandbox. The online site also loads shared Mightora resources, the editor bundle, and production-only Cloudflare analytics. No embedded credential broker or hosted code-execution service is supplied. Do not include secrets in exported or persisted source code.
+
+**Offline note:** the current Monaco + .NET WebAssembly edition is a multi-file static application that requires HTTPS or localhost hosting and currently does not have a fully self-contained `file://` distribution. All compiler assets are published with the application so, once cached by a browser, they do not rely on an external C# service. Do not infer full offline availability from local autosave.
+
+Third-party runtime: [@wasmsharp/core](https://www.npmjs.com/package/@wasmsharp/core) is Apache-2.0 licensed. Its licence is included with the published `runtime/` files. [Comlink](https://github.com/GoogleChromeLabs/comlink) is Apache-2.0 licensed and also shipped locally. The site itself remains MIT licensed.
 
 ### Validate changes
 
@@ -48,7 +56,7 @@ Power Platform custom connectors are configured using two files:
 1. **OpenAPI 2.0 (Swagger) YAML** – describes the API, its actions, parameters, and responses.
 2. **C# policy template script** – optional code that transforms requests and responses inside the connector runtime.
 
-The site currently provides a guided GPT prompt builder, six documented sample connector designs with JavaScript-based demonstrations, and Connector Studio for editing and testing a limited subset of C# transformation patterns.
+The site provides a guided GPT prompt builder, six documented sample connector designs with JavaScript-based demonstrations, and Connector Studio for editing and experimenting with C# transformation scripts.
 
 ---
 

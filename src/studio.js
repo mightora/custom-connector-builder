@@ -3,6 +3,7 @@ import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker.js?worker'
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker.js?worker'
 import JSZip from 'jszip'
 import { DEFAULT_PROJECT, STUDIO_STORAGE_KEY, copyProject, analyseScript, validateOpenApi, runMockPreview } from './studio-logic.js'
+import { runCSharp } from './csharp-runtime.js'
 import './studio.css'
 
 self.MonacoEnvironment = {
@@ -193,6 +194,47 @@ function runTest() {
   displayMockResult(runMockPreview(project.files['script.csx'], project.files['request.json'], project.files['expected.json']))
 }
 
+async function runRealCSharp() {
+  const button = document.getElementById('studio-run-csharp')
+  const status = document.getElementById('studio-test-status')
+  const output = document.getElementById('studio-test-output')
+  const progress = message => setText('studio-csharp-progress', message)
+  button.disabled = true
+  status.className = 'studio-result-heading'
+  status.textContent = 'Compiling and running C#…'
+  output.textContent = 'This may take a minute on first use while the browser downloads the .NET runtime.'
+  try {
+    JSON.parse(project.files['request.json'])
+    JSON.parse(project.files['expected.json'])
+    const result = await runCSharp(project.files['script.csx'], project.files['request.json'], project.files['expected.json'], progress)
+    status.className = 'studio-result-heading studio-result-heading--' + result.status
+    status.textContent = (result.status === 'pass' ? '✓ ' : '✕ ') + result.message
+    output.replaceChildren()
+    const pre = document.createElement('pre')
+    pre.textContent = [
+      result.httpStatus ? `HTTP ${result.httpStatus}` : '',
+      result.actual !== undefined ? `Actual response\n${presentJSON(result.actual)}` : '',
+      result.expected !== undefined ? `Expected response\n${presentJSON(result.expected)}` : '',
+      result.diagnostics?.length ? `Roslyn diagnostics\n${result.diagnostics.map(d => `${d.severity} ${d.id}: ${d.message}`).join('\n')}` : '',
+      result.output ? `Console\n${result.output}` : ''
+    ].filter(Boolean).join('\n\n') || result.message
+    output.append(pre)
+    progress(result.status === 'error' ? 'C# compilation/execution reported an error.' : 'Executed locally with Roslyn + .NET WebAssembly.')
+  } catch (error) {
+    status.className = 'studio-result-heading studio-result-heading--error'
+    status.textContent = '✕ Browser C# runtime failed'
+    let assetCheck = ''
+    try {
+      const response = await fetch(new URL('./runtime/WasmCompiler.js', document.baseURI), { cache: 'no-store' })
+      assetCheck = `\nRuntime asset: HTTP ${response.status} (${response.headers.get('content-type') || 'unknown type'})`
+    } catch (fetchError) { assetCheck = `\nRuntime asset fetch: ${fetchError.message}` }
+    output.textContent = String(error?.message || error) + assetCheck
+    progress('Runtime failed — the mock test remains available. Check browser support and the network panel.')
+  } finally {
+    button.disabled = false
+  }
+}
+
 function showPanel(name) {
   document.querySelectorAll('[data-studio-panel]').forEach(button => {
     const selected = button.dataset.studioPanel === name
@@ -210,7 +252,7 @@ async function exportProject() {
   zip.file('openapi.yaml', project.files['openapi.yaml'])
   zip.file('fixtures/request.json', project.files['request.json'])
   zip.file('fixtures/expected.json', project.files['expected.json'])
-  zip.file('README.md', `# ${project.name}\n\nExported by Mightora Connector Studio.\n\nFiles:\n- script.csx: Power Platform custom connector C# script\n- openapi.yaml: Swagger 2.0 API definition\n- fixtures/: inputs and expected outputs for local preview\n\nIMPORTANT: Connector Studio performs structural validation and a narrow mock transformation preview only; it does not compile or execute arbitrary C# or validate the result in Microsoft's hosted runtime. Test with a .NET compilation harness and a Power Platform development environment before deployment.\n\nSource: https://github.com/mightora/custom-connector-builder\n`)
+  zip.file('README.md', `# ${project.name}\n\nExported by Mightora Connector Studio.\n\nFiles:\n- script.csx: Power Platform custom connector C# script\n- openapi.yaml: Swagger 2.0 API definition\n- fixtures/: inputs and expected outputs for local preview\n\nConnector Studio offers a narrow mock preview and real C# execution in the browser via Roslyn and .NET WebAssembly. Browser execution uses local ScriptBase and JObject testing adapters; it does NOT reproduce Microsoft's hosted runtime or the connector's actual API responses. Test in a Power Platform development environment before deployment.\n\nSource: https://github.com/mightora/custom-connector-builder\n`)
   const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' })
   downloadBlob(blob, 'mightora-connector-project.zip')
   writeStatus('✓ Project exported')
@@ -331,6 +373,7 @@ export function initStudio() {
   document.querySelectorAll('[data-studio-file]').forEach(button => button.addEventListener('click', () => selectFile(button.dataset.studioFile)))
   document.querySelectorAll('[data-studio-panel]').forEach(button => button.addEventListener('click', () => showPanel(button.dataset.studioPanel)))
   document.getElementById('studio-run-test').addEventListener('click', runTest)
+  document.getElementById('studio-run-csharp').addEventListener('click', runRealCSharp)
   document.getElementById('studio-validate').addEventListener('click', refreshDiagnostics)
   document.getElementById('studio-export').addEventListener('click', exportProject)
   document.getElementById('studio-import').addEventListener('change', async event => {

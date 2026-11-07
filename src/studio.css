@@ -63,6 +63,10 @@ html { scroll-padding-top: calc(var(--studio-header-height) + 50px); }
 .studio-test-mark { color: #72819a; font-size: .62rem; font-weight: 800; }
 .studio-run { cursor: pointer; width: 100%; border: 0; border-radius: 8px; margin: 1rem 0; background: #0e69e2; color: #fff; font: 800 .85rem var(--ccb-font-sans); padding: .85rem; }
 .studio-run:hover { background: #06499d; }
+.studio-run--csharp { background: #174a35; margin: 0 0 .35rem; }
+.studio-run--csharp:hover { background: #0e3827; }
+.studio-run:disabled { cursor: wait; opacity: .65; }
+.studio-runtime-progress { font-size: .7rem; color: #53647d; line-height: 1.5; margin: .25rem 0 .8rem; }
 .studio-result-heading { border-radius: 6px; background: #f1f5fa; padding: .55rem .65rem; font-size: .76rem; font-weight: 800; }
 .studio-result-heading--pass { background: #e0f7ec; color: #116347; }
 .studio-result-heading--fail, .studio-result-heading--error { background: #ffebeb; color: #a12327; }
