@@ -1,8 +1,43 @@
 # Custom Connector Builder
 
-A free, open-source web tool that helps Power Platform developers create custom connectors without writing YAML or C# from scratch.
+A free, open-source, browser-based tool for designing Power Platform custom connector C# prompts, exploring reference connectors and inspecting scripts in Connector Studio.
 
-Built and maintained by [Mightora](https://mightora.io). Deployed to GitHub Pages.
+![Build and deployment](https://github.com/mightora/custom-connector-builder/actions/workflows/pages.yml/badge.svg)
+![CodeQL](https://github.com/mightora/custom-connector-builder/actions/workflows/codeql.yml/badge.svg)
+
+Built and maintained by [Mightora](https://mightora.io). Deployed to GitHub Pages. [MIT licence](LICENSE).
+
+## Connector Studio (browser IDE beta)
+
+Visit the **Connector Studio** navigation entry (`#/studio`) to access:
+
+- A Monaco/VS Code-style editor with C#, YAML and JSON file tabs.
+- Starter projects for local transformations and external API proxies.
+- Basic C# structural diagnostics and Swagger 2.0 YAML checks.
+- A deliberately constrained **local mock preview**, limited to familiar `JObject` output patterns with string extraction, trimming, changing case and interpolation; it rejects unsupported control flow and backend calls rather than reporting fabricated passes.
+- Editable request and expected-response JSON fixtures with an output comparison and trace.
+- Optional direct HTTPS API requests, subject to browser CORS restrictions and a per-request confirmation.
+- Browser-local autosave, import of `.csx`, `.cs`, `.yaml`, `.json` and recognised project ZIPs, and project ZIP export.
+- Direct transfer of generated C# baselines and reference connector code into Studio.
+
+### Important execution limitation
+
+**Connector Studio does not compile or run arbitrary C#.** The local preview uses a carefully limited JavaScript interpretation of supported script patterns. Passing a mock preview is not evidence that C# compiles, that code behaves the same in the Microsoft connector runtime, or that an actual connector authentication/backend call works. Scripts containing branches, HTTP calls or unsupported expressions are explicitly marked unsupported. For complete validation, compile with Microsoft's supporting `ScriptBase` types and test the connector in a Power Platform development environment. See [Microsoft custom connector C# guidance](https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code).
+
+All editing, diagnostics and local mock previews run on the visitor's device. An optional live API request contacts the chosen endpoint directly and requires CORS. The online site also loads shared Mightora resources, the editor bundle, and production-only Cloudflare analytics. No embedded credential broker or general-purpose code-execution service is supplied. Do not include secrets in exported or persisted source code.
+
+**Offline note:** the current Monaco-based edition is a multi-file static application that requires hosting and currently does not have a fully self-contained `file://` distribution. A portable, limited-feature offline edition is future work. Do not use the presence of local autosave to infer full offline availability.
+
+### Validate changes
+
+```bash
+npm ci
+npm test
+npm audit --audit-level=high
+npm run build
+```
+
+The GitHub Pages workflow runs tests, dependency audit and build on each push. CodeQL runs on pushes, pull requests and weekly. Workflow badges represent actual execution status and do not constitute independent security certification.
 
 ---
 
@@ -13,7 +48,7 @@ Power Platform custom connectors are configured using two files:
 1. **OpenAPI 2.0 (Swagger) YAML** – describes the API, its actions, parameters, and responses.
 2. **C# policy template script** – optional code that transforms requests and responses inside the connector runtime.
 
-Writing these files by hand is error-prone and time-consuming. This tool guides you through a 10-step wizard and generates both files for you.
+The site currently provides a guided GPT prompt builder, six documented sample connector designs with JavaScript-based demonstrations, and Connector Studio for editing and testing a limited subset of C# transformation patterns.
 
 ---
 
@@ -27,13 +62,10 @@ Writing these files by hand is error-prone and time-consuming. This tool guides 
 
 ## Features
 
-- **10-step guided builder** – define connector type, name, authentication, actions, parameters, and responses
-- **Visual block builder** – assemble C# logic using pre-built code blocks (inputs, validation, operations, outputs)
-- **Live output panels** – YAML and C# update as you configure the connector
-- **Authentication patterns** – no auth, API key, Basic Auth, OAuth 2.0
-- **Working examples** – Dad Jokes (external API) and VAT Calculator (calculation-only)
-- **Copy to clipboard** – one-click copying of generated files
-- **Entirely static** – no backend, no data sent anywhere, runs in the browser
+- **Prompt builder** – configure values, a connector mode, processing rules and example JSON; copy a structured prompt with a generated C# baseline.
+- **Six connector reference walkthroughs** – architecture, C# and Swagger examples with local JavaScript simulations of representative logic.
+- **Connector Studio** – edit C#, Swagger and fixtures; validate, preview supported transformations and export a ZIP.
+- **Local-first application** – static GitHub Pages hosting, no application backend; optional direct API testing only with user confirmation.
 
 ---
 
@@ -41,7 +73,7 @@ Writing these files by hand is error-prone and time-consuming. This tool guides 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 18 or later
+- [Node.js](https://nodejs.org/) 22 or later
 - npm (bundled with Node.js)
 
 ### Steps

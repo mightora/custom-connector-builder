@@ -69,6 +69,7 @@
     nav-links='[
       {"label":"How It Works","url":"/#how-it-works"},
       {"label":"Prompt Builder","url":"/#gpt-prompt"},
+      {"label":"Connector Studio","url":"/#/studio"},
       {"label":"Sample Connectors","url":"/#sample-connectors"},
       {"label":"Mightora.io ↗","url":"https://mightora.io","ext":true}
     ]'>
@@ -91,6 +92,7 @@
         </ul>
         <div class="hero__actions">
           <a href="#gpt-prompt" class="btn btn--primary">Build Prompt</a>
+          <a href="#/studio" class="btn btn--outline">Open Connector Studio <span aria-hidden="true">→</span></a>
         </div>
       </div>
     </section>
@@ -213,8 +215,20 @@
               <button class="btn btn--primary btn--sm" id="copy-gpt-prompt-btn" type="button">Copy Prompt</button>
             </div>
             <pre class="prompt-output" id="gpt-prompt-output" aria-label="Generated GPT prompt"></pre>
+            <button class="btn btn--ghost" id="open-in-studio-btn" type="button">Open generated C# baseline in Connector Studio</button>
           </article>
         </div>
+      </div>
+    </section>
+
+    <section class="section studio-promo" aria-labelledby="studio-promo-heading">
+      <div class="container studio-promo__inner">
+        <div>
+          <p class="studio-eyebrow">New · Local development workbench</p>
+          <h2 id="studio-promo-heading">Write, inspect and test connector scripts in your browser.</h2>
+          <p>Connector Studio combines a VS Code-style editor, Swagger validation, test fixtures, local mock transformation previews, and a downloadable project bundle. Your source stays in your browser unless you explicitly make a live API request.</p>
+        </div>
+        <a href="#/studio" class="btn btn--primary">Launch Connector Studio</a>
       </div>
     </section>
 
@@ -249,6 +263,7 @@
           </nav>
           <h1 class="connector-hero__title" id="connector-title">Connector Title</h1>
           <p class="connector-hero__description" id="connector-description">Connector Description</p>
+          <button id="open-sample-in-studio" class="btn btn--primary" type="button">Open this sample in Connector Studio</button>
         </div>
       </section>
 
@@ -274,6 +289,106 @@
         </div>
       </div>
     </div><!-- End #connector-view -->
+
+    <!-- ── Connector Studio ──────────────────────────────────────── -->
+    <div id="studio-view" class="hidden-view">
+      <section class="studio-intro">
+        <div class="container">
+          <nav aria-label="Breadcrumb"><a class="studio-back" href="#">← Custom Connector Builder</a></nav>
+          <div class="studio-intro__row">
+            <div>
+              <p class="studio-eyebrow">Mightora developer tools / Browser workbench</p>
+              <h1>Connector Studio <span class="studio-beta">Beta</span></h1>
+              <p>A focused workspace for Power Platform connector C#, API definitions and repeatable local tests.</p>
+            </div>
+            <span class="studio-privacy"><span aria-hidden="true">●</span> Local-first workspace</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="studio-toolbar" role="toolbar" aria-label="Connector Studio actions">
+        <div class="container studio-toolbar__inner">
+          <label class="studio-project-select"><span>Project</span>
+            <select id="studio-template" aria-label="Choose sample project">
+              <option value="text">Text transformation</option>
+              <option value="proxy">API proxy starter</option>
+            </select>
+          </label>
+          <button id="studio-new" class="studio-btn" type="button">↻ Reset sample</button>
+          <label class="studio-btn studio-file-input">↑ Import <input id="studio-import" type="file" accept=".cs,.csx,.yaml,.yml,.json,.zip" /></label>
+          <button id="studio-export" class="studio-btn studio-btn--primary" type="button">↓ Export project ZIP</button>
+          <span id="studio-save-status" class="studio-toolbar__status" role="status">Ready</span>
+        </div>
+      </div>
+
+      <div class="studio-workspace container">
+        <aside class="studio-explorer" aria-label="Project files">
+          <p class="studio-panel-label">EXPLORER <span>LOCAL PROJECT</span></p>
+          <p class="studio-explorer-title">CONNECTOR FILES</p>
+          <div id="studio-files" class="studio-files" role="tablist" aria-label="Open file">
+            <button class="studio-file is-active" data-studio-file="script.csx" role="tab" aria-selected="true">⌘ <span>script.csx</span></button>
+            <button class="studio-file" data-studio-file="openapi.yaml" role="tab" aria-selected="false">◇ <span>openapi.yaml</span></button>
+            <button class="studio-file" data-studio-file="request.json" role="tab" aria-selected="false">{ } <span>request.json</span></button>
+            <button class="studio-file" data-studio-file="expected.json" role="tab" aria-selected="false">✓ <span>expected.json</span></button>
+          </div>
+          <div class="studio-explorer-help">
+            <strong>How this works</strong>
+            <p>Edit C# and fixtures, then inspect diagnostics or run a supported mock transformation. No source code is uploaded.</p>
+            <a href="https://learn.microsoft.com/en-us/connectors/custom-connectors/write-code" target="_blank" rel="noopener">Microsoft C# documentation ↗</a>
+          </div>
+        </aside>
+
+        <section class="studio-code" aria-label="Code editor">
+          <div class="studio-code-top">
+            <span id="studio-active-file">script.csx</span>
+            <span id="studio-file-language">C# · ScriptBase</span>
+          </div>
+          <div class="studio-editor-holder" id="studio-editor" aria-label="Source code editor"></div>
+          <textarea id="studio-editor-fallback" class="studio-editor-fallback" spellcheck="false" aria-label="Source code editor (basic mode)" hidden></textarea>
+          <div class="studio-editor-footer">
+            <span>Changes saved in this browser</span>
+            <span id="studio-editor-meta">C# · UTF-8</span>
+          </div>
+        </section>
+
+        <aside class="studio-inspector" aria-label="Testing and diagnostics">
+          <div class="studio-inspector-tabs" role="tablist" aria-label="Right panel">
+            <button type="button" class="is-active" data-studio-panel="tests" role="tab" aria-selected="true">TESTS</button>
+            <button type="button" data-studio-panel="diagnostics" role="tab" aria-selected="false">DIAGNOSTICS <span id="studio-issue-count">0</span></button>
+          </div>
+          <div id="studio-tests-panel" class="studio-inspector-content">
+            <div class="studio-info-box"><strong>Mock preview · C# subset</strong><p>This runs a limited, deterministic interpretation of simple JObject transformations. It does <em>not</em> compile or execute C# or reproduce Microsoft's hosted runtime. Unsupported code is reported as such.</p></div>
+            <div class="studio-test-row"><span class="studio-test-icon">01</span><div><strong>Request fixture</strong><small>request.json</small></div><span class="studio-test-mark">JSON</span></div>
+            <div class="studio-test-row"><span class="studio-test-icon">02</span><div><strong>Expected response</strong><small>expected.json</small></div><span class="studio-test-mark">JSON</span></div>
+            <button id="studio-run-test" class="studio-run" type="button">▶ Run mock test</button>
+            <div id="studio-test-status" class="studio-result-heading" aria-live="polite">Ready to test</div>
+            <div id="studio-test-output" class="studio-result-output">Select Run mock test to see a structured result and trace.</div>
+            <details class="studio-live-details"><summary>Live HTTP request (optional)</summary>
+              <p>Runs directly from your browser. The target server must allow CORS. Do not paste credentials into a shared device.</p>
+              <label for="studio-http-method">Method</label>
+              <select id="studio-http-method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
+              <label for="studio-http-url">HTTPS URL</label>
+              <input id="studio-http-url" type="url" placeholder="https://api.example.com/items" autocomplete="off" />
+              <label for="studio-http-headers">Headers (JSON, optional; never saved)</label>
+              <textarea id="studio-http-headers" rows="3" spellcheck="false">{}</textarea>
+              <label for="studio-http-body">Body (optional; never saved)</label>
+              <textarea id="studio-http-body" rows="4" spellcheck="false"></textarea>
+              <button id="studio-http-send" class="studio-btn studio-btn--primary" type="button">Send request</button>
+              <pre id="studio-http-result" class="studio-http-result" aria-live="polite">No live request sent.</pre>
+            </details>
+          </div>
+          <div id="studio-diagnostics-panel" class="studio-inspector-content" hidden>
+            <div class="studio-info-box"><strong>Structural checks</strong><p>C# structure and basic Swagger 2.0 checks. These are editor diagnostics, not .NET compilation or Microsoft certification.</p></div>
+            <button id="studio-validate" class="studio-btn studio-btn--primary" type="button">Recheck files</button>
+            <ul id="studio-diagnostics-list" class="studio-diagnostics-list" aria-live="polite"></ul>
+          </div>
+        </aside>
+      </div>
+
+      <div class="container studio-bottom-note">
+        <strong>Privacy and limits.</strong> Code, OpenAPI files and mock fixtures remain local in this browser and can be exported. Only optional live HTTP calls contact an API. The browser downloads dependencies for the online editor and the site may load Mightora's shared branding and production analytics. Check Developer Tools → Network to inspect requests; built-in monitoring is not a security audit. For full C# compiler errors and platform-specific connector behaviour, test in a local .NET project and a Power Platform test environment.
+      </div>
+    </div><!-- End #studio-view -->
 
   </main>
 
@@ -302,6 +417,15 @@
       </div>
     </div>
   </mightora-author>
+
+  <section class="container studio-evidence" aria-label="Open source and quality evidence">
+    <p>Open source: inspect the implementation and its GitHub Actions build independently.</p>
+    <a href="https://github.com/mightora/custom-connector-builder/actions/workflows/pages.yml" target="_blank" rel="noopener" aria-label="View build and deployment status"><img src="https://github.com/mightora/custom-connector-builder/actions/workflows/pages.yml/badge.svg" alt="Build and deployment workflow status" /></a>
+    <a href="https://github.com/mightora/custom-connector-builder/actions/workflows/codeql.yml" target="_blank" rel="noopener" aria-label="View CodeQL analysis status"><img src="https://github.com/mightora/custom-connector-builder/actions/workflows/codeql.yml/badge.svg" alt="CodeQL workflow status" /></a>
+    <a href="https://github.com/mightora/custom-connector-builder" target="_blank" rel="noopener">GitHub source</a>
+    <a href="https://github.com/mightora/custom-connector-builder/actions/workflows/pages.yml" target="_blank" rel="noopener">Build &amp; deployment</a>
+    <a href="https://github.com/mightora/custom-connector-builder/blob/main/LICENSE" target="_blank" rel="noopener">MIT licence</a>
+  </section>
 
   <!-- ── Site Footer ───────────────────────────────────────────── -->
   <mightora-footer>

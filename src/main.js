@@ -531,6 +531,28 @@ function initGptPromptBuilder() {
     showNotice('Prompt copied to clipboard.', 'success')
   })
 
+  document.getElementById('open-in-studio-btn')?.addEventListener('click', async () => {
+    const inputFields = parseCsvList(valuesInEl.value)
+    const outputFields = parseCsvList(valuesOutEl.value)
+    const isExternal = !!modeExternalEl?.checked
+    const script = isExternal
+      ? buildCSharpProxyExample(inputFields, outputFields, processingEl.value)
+      : buildCSharpLocalExample(inputFields, outputFields, processingEl.value)
+    let parsedInput = {}
+    try { parsedInput = JSON.parse(sampleInputEl.value) } catch { /* editor will flag malformed sample */ }
+    const firstInput = inputFields[0] || 'Value1'
+    const expected = Object.fromEntries((outputFields.length ? outputFields : ['Value2']).map(field => [
+      field, field.toLowerCase() === 'value2' ? `Hello! You sent: ${String(parsedInput[firstInput] ?? '')}` : ''
+    ]))
+    for (const field of inputFields) expected[field] = String(parsedInput[field] ?? '')
+    const { openStudioWithFiles } = await import('./studio.js')
+    openStudioWithFiles({
+      'script.csx': script,
+      'request.json': sampleInputEl.value,
+      'expected.json': JSON.stringify(expected, null, 2)
+    }, connectorNameEl?.value || 'Generated connector')
+  })
+
   toggleHostField()
   refreshPrompt()
 }
@@ -1674,12 +1696,40 @@ function renderConnectorPage(connector) {
   if (toolElement) {
     sandboxContainer.appendChild(toolElement)
   }
+
+  const sampleOpenButton = document.getElementById('open-sample-in-studio')
+  if (sampleOpenButton) {
+    sampleOpenButton.onclick = async () => {
+      const csharp = connector.markdown.match(/```(?:csharp|cs|c#)\s*\n([\s\S]*?)```/i)?.[1]
+      const swagger = connector.markdown.match(/```(?:yaml|yml)\s*\n([\s\S]*?)```/i)?.[1]
+      const files = {}
+      if (csharp) files['script.csx'] = csharp.trim()
+      if (swagger) files['openapi.yaml'] = swagger.trim()
+      const { openStudioWithFiles } = await import('./studio.js')
+      openStudioWithFiles(files, connector.title)
+      if (!csharp) showNotice('No C# block found in this sample; loaded Studio with the previous script.', 'warning')
+    }
+  }
 }
 
 function handleNavigation() {
   const rawHash = window.location.hash
   const homeView = document.getElementById('home-view')
   const connectorView = document.getElementById('connector-view')
+  const studioView = document.getElementById('studio-view')
+
+  if (rawHash === '#/studio' || rawHash.startsWith('#/studio#')) {
+    homeView?.classList.add('hidden-view')
+    connectorView?.classList.add('hidden-view')
+    studioView?.classList.remove('hidden-view')
+    import('./studio.js').then(({ initStudio }) => initStudio()).catch(error => {
+      console.error('Unable to load Connector Studio', error)
+      showNotice('Unable to load the editor. Please refresh and try again.', 'warning')
+    })
+    window.scrollTo(0, 0)
+    return
+  }
+  studioView?.classList.add('hidden-view')
 
   // Check if hash matches a connector detail route
   // Supports formats like: #/connector/regex-tester or #/connector/regex-tester#step-0-description
